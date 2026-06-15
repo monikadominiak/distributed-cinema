@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 
-function ReservationsTable({ onReservationChange }) {
+function ReservationsTable({ onRefresh }) {
     const [reservations, setReservations] = useState([]);
 
     const loadReservations = async () => {
