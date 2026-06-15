@@ -69,28 +69,6 @@ Verify:
 cqlsh
 ```
 
-### 3. Create the keyspace
-
-```sql
-CREATE KEYSPACE cinema
-WITH replication = {
-    'class': 'SimpleStrategy',
-    'replication_factor': 1
-};
-```
-
-### 4. Create the reservations table
-
-```sql
-CREATE TABLE reservations (
-    seat_number text PRIMARY KEY,
-    reservation_id text,
-    customer_name text,
-    customer_email text,
-    movie_id text,
-    status text
-);
-```
 
 ### 5. Install backend dependencies
 
