@@ -50,7 +50,7 @@ Install:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<username>/distributed-cinema.git
+git clone https://github.com/monikadominiak/distributed-cinema.git
 cd distributed-cinema
 ```
 
