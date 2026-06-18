@@ -230,7 +230,7 @@ frontend/
 |    └── main.jsx
 
 
-
+```
 ## Authors
 
 Monika Dominiak 160307
