@@ -13,14 +13,15 @@ function App() {
     return (
         <div style={{ padding: "20px" }}>
 
-            <h1>Cinema System</h1>
+            <h1>Distributed Cinema Reservation System</h1>
 
             <SeatMap
-                key={refreshKey}
+                key={`seat-${refreshKey}`}
+                onReservationChange={refreshSystem}
             />
 
             <ReservationsTable
-                key={refreshKey}
+                key={`table-${refreshKey}`}
                 onRefresh={refreshSystem}
             />
 

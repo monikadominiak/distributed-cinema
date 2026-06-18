@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import api from "../api";
 
 function ReservationsTable({ onRefresh }) {
+
     const [reservations, setReservations] = useState([]);
+
+    const [editingSeat, setEditingSeat] = useState(null);
+    const [editName, setEditName] = useState("");
+    const [editEmail, setEditEmail] = useState("");
 
     const loadReservations = async () => {
         try {
@@ -19,6 +24,7 @@ function ReservationsTable({ onRefresh }) {
 
     const cancelReservation = async (seatNumber) => {
         try {
+
             await api.delete(`/reservations/${seatNumber}`);
 
             alert(`Cancelled ${seatNumber}`);
@@ -28,11 +34,47 @@ function ReservationsTable({ onRefresh }) {
             if (onRefresh) {
                 onRefresh();
             }
-        
 
         } catch (error) {
-            alert("Failed to cancel");
+            console.error(error);
+            alert("Failed to cancel reservation");
         }
+    };
+
+    const startEdit = (reservation) => {
+        setEditingSeat(reservation.seat_number);
+        setEditName(reservation.customer_name);
+        setEditEmail(reservation.customer_email);
+    };
+
+    const saveEdit = async () => {
+        try {
+
+            await api.put(`/reservations/${editingSeat}`, {
+                customer_name: editName,
+                customer_email: editEmail
+            });
+
+            alert("Reservation updated");
+
+            setEditingSeat(null);
+
+            loadReservations();
+
+            if (onRefresh) {
+                onRefresh();
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Failed to update reservation");
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingSeat(null);
+        setEditName("");
+        setEditEmail("");
     };
 
     return (
@@ -65,7 +107,7 @@ function ReservationsTable({ onRefresh }) {
                         <th>Email</th>
                         <th>Movie</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -77,9 +119,31 @@ function ReservationsTable({ onRefresh }) {
 
                             <td>{reservation.seat_number}</td>
 
-                            <td>{reservation.customer_name}</td>
+                            <td>
+                                {editingSeat === reservation.seat_number ? (
+                                    <input
+                                        value={editName}
+                                        onChange={(e) =>
+                                            setEditName(e.target.value)
+                                        }
+                                    />
+                                ) : (
+                                    reservation.customer_name
+                                )}
+                            </td>
 
-                            <td>{reservation.customer_email}</td>
+                            <td>
+                                {editingSeat === reservation.seat_number ? (
+                                    <input
+                                        value={editEmail}
+                                        onChange={(e) =>
+                                            setEditEmail(e.target.value)
+                                        }
+                                    />
+                                ) : (
+                                    reservation.customer_email
+                                )}
+                            </td>
 
                             <td>{reservation.movie_id}</td>
 
@@ -87,17 +151,57 @@ function ReservationsTable({ onRefresh }) {
 
                             <td>
 
-                                {reservation.status === "ACTIVE" && (
+                                {editingSeat === reservation.seat_number ? (
 
-                                    <button
-                                        onClick={() =>
-                                            cancelReservation(
-                                                reservation.seat_number
-                                            )
-                                        }
-                                    >
-                                        Cancel
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={saveEdit}
+                                            style={{
+                                                marginRight: "5px"
+                                            }}
+                                        >
+                                            Save
+                                        </button>
+
+                                        <button
+                                            onClick={cancelEdit}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </>
+
+                                ) : (
+
+                                    <>
+                                        {reservation.status === "ACTIVE" && (
+
+                                            <>
+                                                <button
+                                                    onClick={() =>
+                                                        startEdit(
+                                                            reservation
+                                                        )
+                                                    }
+                                                    style={{
+                                                        marginRight: "5px"
+                                                    }}
+                                                >
+                                                    Edit
+                                                </button>
+
+                                                <button
+                                                    onClick={() =>
+                                                        cancelReservation(
+                                                            reservation.seat_number
+                                                        )
+                                                    }
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
+
+                                        )}
+                                    </>
 
                                 )}
 

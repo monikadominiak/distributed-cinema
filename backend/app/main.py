@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.seats import SEATS
-from app.services import is_seat_occupied, get_all_reservations
-from app.database import session
+from app.room import ROOM
 from app.models import ReservationCreate, ReservationUpdate
 from app.services import (
     create_reservation,
@@ -10,12 +11,12 @@ from app.services import (
     update_reservation,
     cancel_reservation,
     get_all_reservations,
-    bulk_cancel
+    bulk_cancel,
+    is_seat_occupied
 )
-from app.room import ROOM
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Distributed Cinema Reservation System")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 class BulkCancelRequest(BaseModel):
     seat_numbers: list[str]
@@ -32,29 +34,34 @@ class BulkCancelRequest(BaseModel):
 def root():
     return {"message": "Cinema Reservation API"}
 
+
 @app.get("/seats")
 def get_seats():
-
-    result = []
-
-    for seat in SEATS:
-
-        result.append({
-            "seat": seat,
-            "occupied": is_seat_occupied(seat)
-        })
-
-    return result
-
+    reservations = get_all_reservations()
+    occupied = {
+        r["seat_number"] for r in reservations
+        if r.get("status") == "ACTIVE"
+    }
+    return [
+        {"seat": seat, "occupied": seat in occupied}
+        for seat in SEATS
+    ]
 
 @app.get("/room")
 def get_room():
     return ROOM
 
+
 @app.post("/reservations")
 def reserve(data: ReservationCreate):
 
     reservation = create_reservation(data)
+
+    if reservation == "INVALID_SEAT":
+        raise HTTPException(
+            status_code=400,
+            detail="Seat does not exist"
+        )
 
     if reservation is None:
         raise HTTPException(
@@ -96,13 +103,13 @@ def update(seat_number: str, data: ReservationUpdate):
         raise HTTPException(
             status_code=400,
             detail="Seat does not exist"
-    )
+        )
 
-    if not reservation:
+    if reservation is None:
         raise HTTPException(
-            status_code=409,
-            detail="Seat already reserved"
-    )
+            status_code=404,
+            detail="Reservation not found"
+        )
 
     return reservation
 
@@ -112,7 +119,7 @@ def cancel(seat_number: str):
 
     reservation = cancel_reservation(seat_number)
 
-    if not reservation:
+    if reservation is None:
         raise HTTPException(
             status_code=404,
             detail="Reservation not found"
