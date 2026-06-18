@@ -74,7 +74,7 @@ cqlsh
 CREATE KEYSPACE cinema
 WITH replication = {
     'class': 'SimpleStrategy',
-    'replication_factor': 1
+    'replication_factor': 3
 };
 ```
 
@@ -156,11 +156,7 @@ cd backend
 Run:
 
 ```bash
-python stress_tests/test_1_same_request.py
-python stress_tests/test_2_random_load.py
-python stress_tests/test_3_race_condition.py
-python stress_tests/test_4_reserve_cancel_loop.py
-python stress_tests/test_5_bulk_cancel.py
+python stress_tests/tests.py
 ```
 
 ---
