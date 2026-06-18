@@ -2,17 +2,6 @@
 
 A distributed cinema seat reservation system built with FastAPI and Apache Cassandra. The application supports seat reservations, updates, cancellations, bulk cancellations, and concurrent reservation handling using Cassandra lightweight transactions (LWT).
 
-## Features
-
-* Seat reservation management
-* Prevents double booking
-* Reservation updates
-* Reservation cancellation
-* Bulk seat cancellation
-* REST API built with FastAPI
-* Apache Cassandra persistence
-* Concurrency-safe reservation handling
-* Stress testing suite
 
 ## Tech Stack
 
